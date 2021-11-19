@@ -36,7 +36,7 @@ def main():
         fo = open(path+'Information.txt',encoding='UTF-8')
         boxName = path.split('\\')[-2]
         fList.append(boxName)
-        print(fList)
+        # print(fList)
         for ri in fo:
             if ri:
                 ri = ri.strip('\n')
@@ -44,7 +44,7 @@ def main():
                 fList.append(ri[start+1:])
             
         n = n + 1
-        print(i+"finish")
+        # print(i+"finish")
     
     fMat = numpy.array(fList).reshape(totalNum,4)
 

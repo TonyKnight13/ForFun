@@ -1,15 +1,12 @@
-class Solution:
-    """
-    @param: a: An integer
-    @param: b: An integer
-    @return: The sum of a and b
-    """
-    def aplusb(self, a, b):
-        # write your code here
-        if((a&b)==0):
-            return a|b
-        return self.aplusb((a&b)<<1,a^b)
+a = dict()
+a['a'] = [1,2,3]
 
-x = Solution()
-d = x.aplusb(100,-100)
+b = a.copy()
+b['a'] = [5,6]
+c = a.copy()
+d = b.copy()
+
+print(a)
+print(b)
+print(c)
 print(d)
