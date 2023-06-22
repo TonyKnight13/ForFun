@@ -1,10 +1,17 @@
+'''
+Author: Taony
+Date: 2023-04-05 15:07:02
+LastEditors: Taony
+LastEditTime: 2023-04-06 10:01:18
+FilePath: \ForFun\managaDataProcess\childGetInfo.py
+'''
 import shutil
 import os
 import io
 import sys
 import re
 import string
-import numpy
+import numpy as np
 import pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -21,38 +28,39 @@ def getMessage():
             flag = 0
         else:
             ftree.remove(delname)
-    ftree.remove('Informations.xlsx')
+    if 'Informations.xlsx' in ftree:
+        ftree.remove('Informations.xlsx')
     return fatherpath, ftree
 
 
 def main():
     fatherpath, ftree = getMessage()
-    totalNum = len(ftree)
-    fList = []
-    n = 0
-
-    for i in ftree:
-        path = fatherpath + ftree[n] + '\\'
-        fo = open(path+'Information.txt',encoding='UTF-8')
-        boxName = path.split('\\')[-2]
-        fList.append(boxName)
-        # print(fList)
-        for ri in fo:
-            if ri:
-                ri = ri.strip('\n')
-                start = re.search(' ', ri).start()
-                fList.append(ri[start+1:])
-            
-        n = n + 1
-        # print(i+"finish")
+    itemNum = len(ftree)
+    items = list()
     
-    fMat = numpy.array(fList).reshape(totalNum,4)
+    for i in range(itemNum):
+        item = list()
+        path = fatherpath + ftree[i] + '\\'
+        item.append(ftree[i])
+        with open(path + 'Information.txt', 'a+', encoding = 'utf-8') as fo:
+            fo.seek(0)
+            info = fo.readlines()
+            if len(info) == 3 :
+                if info[-1][-1:] == '\n':
+                    fo.write('备注: ')
+                else:
+                    fo.write('\n备注:')
+                info.append('')
+            for subInfo in info:
+                item.append(subInfo.strip('\n').split(':')[-1].strip())
+        
+        items.append(item)
 
-    fData_df = pd.DataFrame(fMat)
-    headerName = ['文件夹名','名称','作者','是否有修']
-    writer = pd.ExcelWriter(fatherpath+'Informations.xlsx')
-    fData_df.to_excel(writer,header=headerName,index=False )
-    writer.save()
+    item_df = pd.DataFrame(items)
+    headerName = ['文件夹名','名称','作者','是否有修','备注']    
+    writer = pd.ExcelWriter(fatherpath + 'Informations.xlsx')
+    item_df.to_excel(writer, header=headerName, index=False )
+    writer.close()            
 
 
 if __name__ == '__main__':

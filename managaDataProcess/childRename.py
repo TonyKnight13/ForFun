@@ -1,4 +1,10 @@
-import shutil
+'''
+Author: Taony
+Date: 2023-04-05 15:07:02
+LastEditors: Taony
+LastEditTime: 2023-04-06 09:47:10
+FilePath: \ForFun\managaDataProcess\childRename.py
+'''
 import os
 import io
 import sys
@@ -18,36 +24,29 @@ def getMessage():
             flag = 0
         else:
             ftree.remove(delname)
-    ftree.remove('Informations.xlsx')
+    if 'Informations.xlsx' in ftree:
+        ftree.remove('Informations.xlsx')
     return fatherpath, ftree
 
 
 def main():
     fatherpath, ftree = getMessage()
 
-    n = 0
-
-    for i in ftree:
-        path = fatherpath + ftree[n] + '\\'
+    for i in range(len(ftree)):
+        path = fatherpath + ftree[i] + '\\'
         f = os.listdir(path)
         f.remove('Information.txt')
         for k in f.copy():
             matchObj = re.match('E', k)
             if matchObj:
                 f.remove(k)
-        m = 0
         count = 0
-        for j in f:
-            count = count + 1
-            oldname = path + f[m]
+        for j in range(len(f)):
+            count += 1
+            oldname = path + f[j]
             filename, ftype = os.path.splitext(oldname)
             newname = path + str(count).zfill(3) + ftype
             os.rename(oldname, newname)
-
-            m = m + 1
-
-        n = n + 1
-
 
 if __name__ == '__main__':
     main()
