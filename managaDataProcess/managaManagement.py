@@ -15,7 +15,7 @@ import logging
 import re
 
 import chardet
-
+from natsort import os_sorted
 
 from managaManagementConstants import ManagaManagementConstants
 from managaInfo import ManagaInfo
@@ -152,11 +152,24 @@ class ManagaManagement:
                     if matchObj:
                         fileList.remove(pic)
 
+                # 按操作系统的排序算法进行排序
+                fileList = os_sorted(fileList)
+
                 for idx in range(len(fileList)):
-                    originName = managaFolderPath + fileList[j]
-                    _, fileType = os.path.splitext(originName)
-                    fileName = managaFolderPath + str(idx + 1).zfill(3) + fileType
-                    os.rename(originName, fileName)
+                    originFilePath = managaFolderPath + fileList[idx]
+                    _, fileType = os.path.splitext(originFilePath)
+                    fileName = str(idx + 1).zfill(3) + fileType
+                    filePath = managaFolderPath + fileName
+                    # 将已存在的文件名进行修改，改为临时命名
+                    if fileName in fileList:
+                        existIdx = fileList.index(fileName)
+                        tempFileName = 'tempForRename' + fileName
+                        tempFilePath = managaFolderPath + tempFileName
+                        os.rename(filePath, tempFilePath)
+                        fileList[existIdx] = tempFileName
+            
+                    os.rename(originFilePath, filePath)
+                    fileList[idx] = fileName
         except:
             logging.exception(managaFolderPath + "异常")
         else:
