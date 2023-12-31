@@ -8,15 +8,15 @@ FilePath: \ForFun\managaDataProcess\childGetInfo.py
 import os
 import io
 import sys
-import re
-import string
-import numpy as np
 import pandas as pd
 import argparse
-
-import chardet
 import json
 import logging
+import re
+
+import chardet
+
+
 from managaManagementConstants import ManagaManagementConstants
 from managaInfo import ManagaInfo
 from managaJsonEncoder import ManagaJsonEncoder
@@ -103,9 +103,9 @@ class ManagaManagement:
                         for k, v in metaInfoJsonDict.items()
                     }
                     managaInfomation = ManagaInfo(**metaInfoDict)
-                    
+
                     # 数据库记录与对象做映射：...
-                    if managaInfomation.Id == '':
+                    if managaInfomation.Id == "":
                         # 新增：如果数据库检索不到作者+作品名，则数据库新增记录；否则抛出异常。
                         pass
                     else:
@@ -113,25 +113,54 @@ class ManagaManagement:
                         pass
 
                     managaInfomation.Path = self.fatherPath + fTree[i] + "\\"
-                    if '-r' in fTree[i]:
-                        managaInfomation.RecommendationLevel = self.managaManagementConstants.RECOMMEND
-                    if '-spr' in fTree[i]:
-                        managaInfomation.RecommendationLevel = self.managaManagementConstants.HIGHLY_RECOMMEND
-                    if '(re)' in fTree[i]:
-                        managaInfomation.remake = self.managaManagementConstants.REMAKE_PLAN
+                    if "-r" in fTree[i]:
+                        managaInfomation.RecommendationLevel = (
+                            self.managaManagementConstants.RECOMMEND
+                        )
+                    if "-spr" in fTree[i]:
+                        managaInfomation.RecommendationLevel = (
+                            self.managaManagementConstants.HIGHLY_RECOMMEND
+                        )
+                    if "(re)" in fTree[i]:
+                        managaInfomation.remake = (
+                            self.managaManagementConstants.REMAKE_PLAN
+                        )
 
                     managaMetaInfos.append(managaInfomation.__dict__)
         except:
             logging.exception(managaFolderPath + "异常")
         else:
             managaInfoDataFrame = pd.DataFrame(
-                managaMetaInfos, columns=[
-                    k for k in managaInfomation.__dict__.keys()]
+                managaMetaInfos, columns=[k for k in managaInfomation.__dict__.keys()]
             )
             managaInfoDataFrame.to_csv(
                 self.rootPath + self.managaInfosFileName, index=False, sep=","
             )
             logging.info(self.rootPath + self.managaInfosFileName + "录入完成！")
+
+    def rename(self):
+        fTree = os.listdir(self.rootPath)
+        managaNum = len(fTree)
+
+        try:
+            for i in range(managaNum):
+                managaFolderPath = self.rootPath + fTree[i] + "\\"
+                fileList = os.listdir(managaFolderPath)
+                fileList.remove(self.metaFileName)
+                for pic in fileList.copy():
+                    matchObj = re.match("E", pic)
+                    if matchObj:
+                        fileList.remove(pic)
+
+                for idx in range(len(fileList)):
+                    originName = managaFolderPath + fileList[j]
+                    _, fileType = os.path.splitext(originName)
+                    fileName = managaFolderPath + str(idx + 1).zfill(3) + fileType
+                    os.rename(originName, fileName)
+        except:
+            logging.exception(managaFolderPath + "异常")
+        else:
+            logging.info(self.rootPath + "重命名完成！")
 
 
 if __name__ == "__main__":
@@ -139,10 +168,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rootPath", type=str, default="T:\\temp\\acg temp\\幼驯染\\", help="根目录文件路径"
     )
-    parser.add_argument("--fatherPath", type=str,
-                        default=".\\幼驯染\\", help="父目录文件路径")
-    parser.add_argument("--excludedFileName", type=str,
-                        default="感觉太像了", help="排除的文件夹名")
+    parser.add_argument("--fatherPath", type=str, default=".\\幼驯染\\", help="父目录文件路径")
+    parser.add_argument("--excludedFileName", type=str, default="感觉太像了", help="排除的文件夹名")
     parser.add_argument(
         "--managaInfosFileName",
         type=str,
