@@ -35,24 +35,7 @@ class ManagaManagement:
         self.metaFileName = ""
         self.originMetaFileName = ""
 
-    # def getInfos(self):
-    #     fTree = os.listdir(self.rootPath)
-    #     if(self.excludedFileName):
-    #         fTree.remove(self.excludedFileName)
-    #     if(self.managaInfosFileName in fTree):
-    #         fTree.remove(self.managaInfosFileName)
-
-    #     managaNum = len(fTree)
-    #     managas = list()
-
-    #     for i in range(managaNum):
-    #         managa = list()
-    #         managaFolderPath = self.rootPath + fTree[i] + '\\'
-    #         managa.append(fTree[i])
-    #         with open( managaFolderPath + self.metaFileName, 'a+', encoding='utf-8') as f:
-    #             f.seek(0)
-    #             metaInfo = f.readline()
-
+    # 将*.txt转换为*.json，并丰富元信息字段
     def metaTxt2JsonConvert(self):
         fTree = os.listdir(self.rootPath)
         if self.excludedFileName:
@@ -76,53 +59,85 @@ class ManagaManagement:
                     metaInfo = fTxt.readlines()
                     assert len(metaInfo) == 4
                     for subMetaInfo in metaInfo:
-                        encoding = chardet.detect(subMetaInfo)['encoding']
-                        if encoding.lower().startswith('utf-8'):
-                            subMetaInfo = subMetaInfo.decode('utf-8-sig')
+                        encoding = chardet.detect(subMetaInfo)["encoding"]
+                        if encoding.lower().startswith("utf-8"):
+                            subMetaInfo = subMetaInfo.decode("utf-8-sig")
                         metaAttrs = subMetaInfo.strip("\n").split(":")
                         setattr(
                             managaInfomation,
-                            self.managaManagementConstants.metaCHN2ENGDict[metaAttrs[0].strip(
-                            )],
+                            self.managaManagementConstants.metaCHN2ENGDict[
+                                metaAttrs[0].strip()
+                            ],
                             str(metaAttrs[-1].strip()),
                         )
                         managaInfomation.Id = str(i)
-                    json.dump({k:v for k,v in managaInfomation}, fp=fJson,
-                            cls=ManagaJsonEncoder, ensure_ascii=False)
+                    json.dump(
+                        {k: v for k, v in managaInfomation},
+                        fp=fJson,
+                        cls=ManagaJsonEncoder,
+                        ensure_ascii=False,
+                    )
         except:
             logging.exception(managaFolderPath + "异常")
         else:
-            logging.info('转换完成！')
+            logging.info("转换完成！")
+
+    def getInfos(self):
+        fTree = os.listdir(self.rootPath)
+        if self.excludedFileName:
+            fTree.remove(self.excludedFileName)
+        if self.managaInfosFileName in fTree:
+            fTree.remove(self.managaInfosFileName)
+
+        managaNum = len(fTree)
+        managaMetaInfos = list()
+        try:
+            for i in range(managaNum):
+                managa = list()
+                managaFolderPath = self.rootPath + fTree[i] + "\\"
+                managa.append(fTree[i])
+                with open(
+                    managaFolderPath + self.metaFileName, "r+", encoding="utf-8"
+                ) as f:
+                    metaInfoJsonDict = json.load(fp=f)
+                    managaMetaInfos.append(metaInfoJsonDict)
+        except:
+            logging.exception(managaFolderPath + "异常")
+        else:
+            managaInfoDataFrame = pd.DataFrame(managaMetaInfos, columns=[k for k in metaInfoJsonDict.keys()])
+            managaInfoDataFrame.to_csv(self.rootPath + self.managaInfosFileName, index=False,sep=',')
+            logging.info(self.rootPath + self.managaInfosFileName + "录入完成！")       
+        
 
 
 # def main():
-    # fatherpath, fTree = getMessage()
-    # itemNum = len(fTree)
-    # items = list()
+# fatherpath, fTree = getMessage()
+# itemNum = len(fTree)
+# items = list()
 
-    # for i in range(itemNum):
-    #     item = list()
-    #     path = fatherpath + fTree[i] + "\\"
-    #     item.append(fTree[i])
-    #     with open(path + "Information.txt", "a+", encoding="utf-8") as fo:
-    #         fo.seek(0)
-    #         info = fo.readlines()
-    #         if len(info) == 3:
-    #             if info[-1][-1:] == "\n":
-    #                 fo.write("备注: ")
-    #             else:
-    #                 fo.write("\n备注:")
-    #             info.append("")
-    #         for subInfo in info:
-    #             item.append(subInfo.strip("\n").split(":")[-1].strip())
+# for i in range(itemNum):
+#     item = list()
+#     path = fatherpath + fTree[i] + "\\"
+#     item.append(fTree[i])
+#     with open(path + "Information.txt", "a+", encoding="utf-8") as fo:
+#         fo.seek(0)
+#         info = fo.readlines()
+#         if len(info) == 3:
+#             if info[-1][-1:] == "\n":
+#                 fo.write("备注: ")
+#             else:
+#                 fo.write("\n备注:")
+#             info.append("")
+#         for subInfo in info:
+#             item.append(subInfo.strip("\n").split(":")[-1].strip())
 
-    #     items.append(item)
+#     items.append(item)
 
-    # item_df = pd.DataFrame(items)
-    # headerName = ["文件夹名", "名称", "作者", "是否有修", "备注"]
-    # writer = pd.ExcelWriter(fatherpath + "Informations.xlsx")
-    # item_df.to_excel(writer, header=headerName, index=False)
-    # writer.close()
+# item_df = pd.DataFrame(items)
+# headerName = ["文件夹名", "名称", "作者", "是否有修", "备注"]
+# writer = pd.ExcelWriter(fatherpath + "Informations.xlsx")
+# item_df.to_excel(writer, header=headerName, index=False)
+# writer.close()
 
 
 if __name__ == "__main__":
@@ -130,9 +145,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rootPath", type=str, default="T:\\temp\\acg temp\\幼驯染\\", help="根目录文件路径"
     )
-    parser.add_argument(
-        "--excludedFileName", type=str, default="感觉太像了", help="排除的文件夹名"
-    )
+    parser.add_argument("--excludedFileName", type=str, default="感觉太像了", help="排除的文件夹名")
     parser.add_argument(
         "--managaInfosFileName",
         type=str,
