@@ -2,7 +2,7 @@
 Author: Taony
 Date: 2023-12-30 16:45:46
 LastEditors: Taony
-LastEditTime: 2023-12-31 15:49:10
+LastEditTime: 2023-12-31 16:57:23
 FilePath: \ForFun\managaDataProcess\managaInfo.py
 '''
 import json
@@ -20,6 +20,17 @@ class ManagaInfo:
         self.remake = '0'
         self.Notes = ''
         self.Path = ''
+    
+    def __init__(self, **kwargs):
+        self.Id = ''
+        self.Name = ''
+        self.Author = ''
+        self.Uncorrected = '0'
+        self.RecommendationLevel = '0'
+        self.remake = '0'
+        self.Notes = ''
+        self.Path = ''
+        self.__dict__.update(kwargs)
 
     def __iter__(self):
         yield from {

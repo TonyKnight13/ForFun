@@ -102,29 +102,31 @@ class ManagaManagement:
                         self.managaManagementConstants.metaCHN2ENGDict[k]: v
                         for k, v in metaInfoJsonDict.items()
                     }
-                    managaInfo = ManagaInfo(**metaInfoDict)
+                    managaInfomation = ManagaInfo(**metaInfoDict)
+                    
                     # 数据库记录与对象做映射：...
-                    if managaInfo.Id == '':
+                    if managaInfomation.Id == '':
                         # 新增：如果数据库检索不到作者+作品名，则数据库新增记录；否则抛出异常。
                         pass
                     else:
                         # 修改：如果数据库数据与内存数据不一致，记入日志。
                         pass
 
-                    managaInfo.Path = self.fatherPath + fTree[i] + "\\"
+                    managaInfomation.Path = self.fatherPath + fTree[i] + "\\"
                     if '-r' in fTree[i]:
-                        managaInfo.RecommendationLevel = str(1)
+                        managaInfomation.RecommendationLevel = self.managaManagementConstants.RECOMMEND
                     if '-spr' in fTree[i]:
-                        managaInfo.RecommendationLevel = str(2)
+                        managaInfomation.RecommendationLevel = self.managaManagementConstants.HIGHLY_RECOMMEND
                     if '(re)' in fTree[i]:
-                        managaInfo.remake = str(1)
+                        managaInfomation.remake = self.managaManagementConstants.REMAKE_PLAN
 
-                    managaMetaInfos.append(managaInfo.__dict__)
+                    managaMetaInfos.append(managaInfomation.__dict__)
         except:
             logging.exception(managaFolderPath + "异常")
         else:
             managaInfoDataFrame = pd.DataFrame(
-                managaMetaInfos, columns=[k for k in managaInfo.__dict__.keys()]
+                managaMetaInfos, columns=[
+                    k for k in managaInfomation.__dict__.keys()]
             )
             managaInfoDataFrame.to_csv(
                 self.rootPath + self.managaInfosFileName, index=False, sep=","
@@ -137,8 +139,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rootPath", type=str, default="T:\\temp\\acg temp\\幼驯染\\", help="根目录文件路径"
     )
-    parser.add_argument("--fatherPath", type=str, default=".\\幼驯染\\", help="父目录文件路径")
-    parser.add_argument("--excludedFileName", type=str, default="感觉太像了", help="排除的文件夹名")
+    parser.add_argument("--fatherPath", type=str,
+                        default=".\\幼驯染\\", help="父目录文件路径")
+    parser.add_argument("--excludedFileName", type=str,
+                        default="感觉太像了", help="排除的文件夹名")
     parser.add_argument(
         "--managaInfosFileName",
         type=str,
