@@ -5,7 +5,6 @@ LastEditors: Taony
 LastEditTime: 2023-12-30 18:02:20
 FilePath: \ForFun\managaDataProcess\childGetInfo.py
 """
-import shutil
 import os
 import io
 import sys
@@ -30,13 +29,14 @@ class ManagaManagement:
 
     def __init__(self) -> None:
         self.rootPath = ""
+        self.fatherPath = ""
         self.excludedFileName = ""
         self.managaInfosFileName = ""
         self.metaFileName = ""
         self.originMetaFileName = ""
 
     # 将*.txt转换为*.json，并丰富元信息字段
-    def metaTxt2JsonConvert(self):
+    def convertMetaTxt2Json(self):
         fTree = os.listdir(self.rootPath)
         if self.excludedFileName:
             fTree.remove(self.excludedFileName)
@@ -93,51 +93,43 @@ class ManagaManagement:
         managaMetaInfos = list()
         try:
             for i in range(managaNum):
-                managa = list()
                 managaFolderPath = self.rootPath + fTree[i] + "\\"
-                managa.append(fTree[i])
                 with open(
                     managaFolderPath + self.metaFileName, "r+", encoding="utf-8"
                 ) as f:
                     metaInfoJsonDict = json.load(fp=f)
-                    managaMetaInfos.append(metaInfoJsonDict)
+                    metaInfoDict = {
+                        self.managaManagementConstants.metaCHN2ENGDict[k]: v
+                        for k, v in metaInfoJsonDict.items()
+                    }
+                    managaInfo = ManagaInfo(**metaInfoDict)
+                    # 数据库记录与对象做映射：...
+                    if managaInfo.Id == '':
+                        # 新增：如果数据库检索不到作者+作品名，则数据库新增记录；否则抛出异常。
+                        pass
+                    else:
+                        # 修改：如果数据库数据与内存数据不一致，记入日志。
+                        pass
+
+                    managaInfo.Path = self.fatherPath + fTree[i] + "\\"
+                    if '-r' in fTree[i]:
+                        managaInfo.RecommendationLevel = str(1)
+                    if '-spr' in fTree[i]:
+                        managaInfo.RecommendationLevel = str(2)
+                    if '(re)' in fTree[i]:
+                        managaInfo.remake = str(1)
+
+                    managaMetaInfos.append(managaInfo.__dict__)
         except:
             logging.exception(managaFolderPath + "异常")
         else:
-            managaInfoDataFrame = pd.DataFrame(managaMetaInfos, columns=[k for k in metaInfoJsonDict.keys()])
-            managaInfoDataFrame.to_csv(self.rootPath + self.managaInfosFileName, index=False,sep=',')
-            logging.info(self.rootPath + self.managaInfosFileName + "录入完成！")       
-        
-
-
-# def main():
-# fatherpath, fTree = getMessage()
-# itemNum = len(fTree)
-# items = list()
-
-# for i in range(itemNum):
-#     item = list()
-#     path = fatherpath + fTree[i] + "\\"
-#     item.append(fTree[i])
-#     with open(path + "Information.txt", "a+", encoding="utf-8") as fo:
-#         fo.seek(0)
-#         info = fo.readlines()
-#         if len(info) == 3:
-#             if info[-1][-1:] == "\n":
-#                 fo.write("备注: ")
-#             else:
-#                 fo.write("\n备注:")
-#             info.append("")
-#         for subInfo in info:
-#             item.append(subInfo.strip("\n").split(":")[-1].strip())
-
-#     items.append(item)
-
-# item_df = pd.DataFrame(items)
-# headerName = ["文件夹名", "名称", "作者", "是否有修", "备注"]
-# writer = pd.ExcelWriter(fatherpath + "Informations.xlsx")
-# item_df.to_excel(writer, header=headerName, index=False)
-# writer.close()
+            managaInfoDataFrame = pd.DataFrame(
+                managaMetaInfos, columns=[k for k in managaInfo.__dict__.keys()]
+            )
+            managaInfoDataFrame.to_csv(
+                self.rootPath + self.managaInfosFileName, index=False, sep=","
+            )
+            logging.info(self.rootPath + self.managaInfosFileName + "录入完成！")
 
 
 if __name__ == "__main__":
@@ -145,6 +137,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rootPath", type=str, default="T:\\temp\\acg temp\\幼驯染\\", help="根目录文件路径"
     )
+    parser.add_argument("--fatherPath", type=str, default=".\\幼驯染\\", help="父目录文件路径")
     parser.add_argument("--excludedFileName", type=str, default="感觉太像了", help="排除的文件夹名")
     parser.add_argument(
         "--managaInfosFileName",
@@ -163,9 +156,11 @@ if __name__ == "__main__":
 
     managaManagement = ManagaManagement()
     managaManagement.rootPath = args.rootPath
+    managaManagement.fatherPath = args.fatherPath
     managaManagement.excludedFileName = args.excludedFileName
     managaManagement.managaInfosFileName = args.managaInfosFileName
     managaManagement.metaFileName = args.metaFileName
     managaManagement.originMetaFileName = args.originMetaFileName
 
-    managaManagement.metaTxt2JsonConvert()
+    # managaManagement.convertMetaTxt2Json()
+    managaManagement.getInfos()

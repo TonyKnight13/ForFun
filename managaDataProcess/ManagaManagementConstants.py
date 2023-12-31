@@ -1,12 +1,3 @@
-"""
-Author: Taony
-Date: 2023-12-30 17:50:05
-LastEditors: Taony
-LastEditTime: 2023-12-30 17:55:30
-FilePath: \ForFun\managaDataProcess\managaManagementConstants.py
-"""
-
-
 class ManagaManagementConstants:
     metaENG2CHNDict = {
         "Id": "序列号",
@@ -26,3 +17,7 @@ class ManagaManagementConstants:
         "推荐等级": "RecommendationLevel",
         "备注": "Notes",
     }
+    recommendationLevelDict = {"0": "无", "1": "推荐", "2": "强烈推荐"}
+    remakeDict = {"0": "无重制计划", "1": "有重制计划"}
+    uncorrectedNum2StrDict = {"0": "无", "1": "半", "2": "有"}
+    uncorrectedStr2NumDict = {"无": "0", "半": "1", "有": "2"}
