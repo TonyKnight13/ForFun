@@ -23,7 +23,6 @@ from managaJsonEncoder import ManagaJsonEncoder
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-
 class ManagaManagement:
     managaManagementConstants = ManagaManagementConstants()
 
@@ -35,13 +34,17 @@ class ManagaManagement:
         self.metaFileName = ""
         self.originMetaFileName = ""
 
-    # 将*.txt转换为*.json，并丰富元信息字段
-    def convertMetaTxt2Json(self):
+    def getFTree(self):
         fTree = os.listdir(self.rootPath)
         if self.excludedFileName:
             fTree.remove(self.excludedFileName)
         if self.managaInfosFileName in fTree:
             fTree.remove(self.managaInfosFileName)
+        return fTree
+
+    # 将*.txt转换为*.json，并丰富元信息字段
+    def convertMetaTxt2Json(self):
+        fTree = self.getFTree()
 
         managaNum = len(fTree)
         try:
@@ -83,11 +86,7 @@ class ManagaManagement:
             logging.info("转换完成！")
 
     def getInfos(self):
-        fTree = os.listdir(self.rootPath)
-        if self.excludedFileName:
-            fTree.remove(self.excludedFileName)
-        if self.managaInfosFileName in fTree:
-            fTree.remove(self.managaInfosFileName)
+        fTree = self.getFTree()
 
         managaNum = len(fTree)
         managaMetaInfos = list()
@@ -139,7 +138,8 @@ class ManagaManagement:
             logging.info(self.rootPath + self.managaInfosFileName + "录入完成！")
 
     def rename(self):
-        fTree = os.listdir(self.rootPath)
+        fTree = self.getFTree()
+
         managaNum = len(fTree)
 
         try:
@@ -163,6 +163,8 @@ class ManagaManagement:
                     # 将已存在的文件名进行修改，改为临时命名
                     if fileName in fileList:
                         existIdx = fileList.index(fileName)
+                        if existIdx == idx:
+                            continue
                         tempFileName = 'tempForRename' + fileName
                         tempFilePath = managaFolderPath + tempFileName
                         os.rename(filePath, tempFilePath)
@@ -208,3 +210,4 @@ if __name__ == "__main__":
 
     # managaManagement.convertMetaTxt2Json()
     managaManagement.getInfos()
+    managaManagement.rename()
