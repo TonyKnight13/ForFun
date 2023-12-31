@@ -14,10 +14,13 @@ import string
 import numpy as np
 import pandas as pd
 import argparse
-import managaInfo
+
+import chardet
 import json
-import ManagaManagementConstants
 import logging
+from managaManagementConstants import ManagaManagementConstants
+from managaInfo import ManagaInfo
+from managaJsonEncoder import ManagaJsonEncoder
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
@@ -58,30 +61,38 @@ class ManagaManagement:
             fTree.remove(self.managaInfosFileName)
 
         managaNum = len(fTree)
-
-        for i in range(managaNum):
-            managa = list()
-            managaFolderPath = self.rootPath + fTree[i] + "\\"
-            managa.append(fTree[i])
-            with open(
-                managaFolderPath + self.originMetaFileName, "r", encoding="utf-8"
-            ) as fTxt, open(
-                managaFolderPath + self.metaFileName, "w", encoding="utf-8"
-            ) as fJson:
-                managaInfo = managaInfo()
-                fTxt.seek(0)
-                metaInfo = fTxt.readline()
-                assert len(metaInfo) == 4
-                for subMetaInfo in metaInfo:
-                    metaAttrs = subMetaInfo.strip("\n").split(":")
-                    setattr(
-                        metaInfo,
-                        self.managaManagementConstants.metaCHN2ENGDict[metaAttrs[0]],
-                        metaAttrs[-1],
-                    )
-                json.dump(managaInfo, fJson)
-        
-        logging.info('转换完成！')
+        try:
+            for i in range(managaNum):
+                managa = list()
+                managaFolderPath = self.rootPath + fTree[i] + "\\"
+                managa.append(fTree[i])
+                with open(
+                    managaFolderPath + self.originMetaFileName, "rb"
+                ) as fTxt, open(
+                    managaFolderPath + self.metaFileName, "w", encoding="utf-8"
+                ) as fJson:
+                    managaInfomation = ManagaInfo()
+                    fTxt.seek(0)
+                    metaInfo = fTxt.readlines()
+                    assert len(metaInfo) == 4
+                    for subMetaInfo in metaInfo:
+                        encoding = chardet.detect(subMetaInfo)['encoding']
+                        if encoding.lower().startswith('utf-8'):
+                            subMetaInfo = subMetaInfo.decode('utf-8-sig')
+                        metaAttrs = subMetaInfo.strip("\n").split(":")
+                        setattr(
+                            managaInfomation,
+                            self.managaManagementConstants.metaCHN2ENGDict[metaAttrs[0].strip(
+                            )],
+                            str(metaAttrs[-1].strip()),
+                        )
+                        managaInfomation.Id = str(i)
+                    json.dump({k:v for k,v in managaInfomation}, fp=fJson,
+                            cls=ManagaJsonEncoder, ensure_ascii=False)
+        except:
+            logging.exception(managaFolderPath + "异常")
+        else:
+            logging.info('转换完成！')
 
 
 # def main():
@@ -134,7 +145,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--originMetaFileName", type=str, default="Information.txt", help="原漫画元信息文件名"
     )
-    
+
     args = parser.parse_args()
 
     managaManagement = ManagaManagement()
