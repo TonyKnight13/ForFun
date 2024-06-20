@@ -1,10 +1,19 @@
 '''
 Author: Taony
+Date: 2023-12-31 18:11:38
+LastEditors: Taony
+LastEditTime: 2024-02-07 23:02:30
+FilePath: \ForFun\managaDataProcess\managaManagementConstants.py
+'''
+"""
+Author: Taony
 Date: 2023-12-31 16:42:40
 LastEditors: Taony
 LastEditTime: 2023-12-31 16:55:04
 FilePath: \ForFun\managaDataProcess\ManagaManagementConstants.py
-'''
+"""
+
+
 class ManagaManagementConstants:
     metaENG2CHNDict = {
         "Id": "序列号",
@@ -30,7 +39,8 @@ class ManagaManagementConstants:
     remakeStr2NumDict = {"无重制计划": "0", "有重制计划": "1"}
     uncorrectedNum2StrDict = {"0": "无", "1": "半", "2": "有"}
     uncorrectedStr2NumDict = {"无": "0", "半": "1", "有": "2"}
+    excludeTypeDict = {"文件夹": "folders", "文件": "files"}
 
-    RECOMMEND = recommendationLevelStr2NumDict['推荐']
-    HIGHLY_RECOMMEND = recommendationLevelStr2NumDict['强烈推荐']
-    REMAKE_PLAN = remakeStr2NumDict['有重制计划']
+    RECOMMEND = recommendationLevelStr2NumDict["推荐"]
+    HIGHLY_RECOMMEND = recommendationLevelStr2NumDict["强烈推荐"]
+    REMAKE_PLAN = remakeStr2NumDict["有重制计划"]

@@ -29,17 +29,27 @@ class ManagaManagement:
     def __init__(self) -> None:
         self.rootPath = ""
         self.fatherPath = ""
-        self.excludedFileName = ""
+        self.excludedFileNames = ""
         self.managaInfosFileName = ""
         self.metaFileName = ""
         self.originMetaFileName = ""
 
     def getFTree(self):
         fTree = os.listdir(self.rootPath)
-        if self.excludedFileName:
-            fTree.remove(self.excludedFileName)
-        if self.managaInfosFileName in fTree:
-            fTree.remove(self.managaInfosFileName)
+        excludedFolders = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件夹"]]
+        excludedFiles = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件"]]
+
+        try:
+            if excludedFolders:
+                for folder in excludedFolders:
+                    if folder in fTree:
+                        fTree.remove(folder)
+            if excludedFiles:
+                for file in excludedFiles:
+                    if file in fTree:
+                        fTree.remove(file)
+        except:
+            logging.exception(self.excludedFileNames + "异常")
         return fTree
 
     # 将*.txt转换为*.json，并丰富元信息字段
@@ -181,10 +191,10 @@ class ManagaManagement:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--rootPath", type=str, default="T:\\temp\\acg temp\\幼驯染\\", help="根目录文件路径"
+        "--rootPath", type=str, default="D:\\Comic\\SOLA\\幼驯染\\", help="根目录文件路径"
     )
     parser.add_argument("--fatherPath", type=str, default=".\\幼驯染\\", help="父目录文件路径")
-    parser.add_argument("--excludedFileName", type=str, default="感觉太像了", help="排除的文件夹名")
+    parser.add_argument("--excludedFileNames", type=str, default="{\"folders\":[\"感觉太像了\"],\"files\":[\"sync.ffs_db\", \"Informations.csv\"]}", help="排除的文件、文件夹名")
     parser.add_argument(
         "--managaInfosFileName",
         type=str,
@@ -203,7 +213,7 @@ if __name__ == "__main__":
     managaManagement = ManagaManagement()
     managaManagement.rootPath = args.rootPath
     managaManagement.fatherPath = args.fatherPath
-    managaManagement.excludedFileName = args.excludedFileName
+    managaManagement.excludedFileNames = args.excludedFileNames
     managaManagement.managaInfosFileName = args.managaInfosFileName
     managaManagement.metaFileName = args.metaFileName
     managaManagement.originMetaFileName = args.originMetaFileName
