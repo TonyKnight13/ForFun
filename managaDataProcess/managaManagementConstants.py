@@ -39,7 +39,7 @@ class ManagaManagementConstants:
     remakeStr2NumDict = {"无重制计划": "0", "有重制计划": "1"}
     uncorrectedNum2StrDict = {"0": "无", "1": "半", "2": "有"}
     uncorrectedStr2NumDict = {"无": "0", "半": "1", "有": "2"}
-    excludeTypeDict = {"文件夹": "folders", "文件": "files"}
+    excludeTypeDict = {"文件夹": "folders", "文件": "files", "文件类型": "extension"}
 
     RECOMMEND = recommendationLevelStr2NumDict["推荐"]
     HIGHLY_RECOMMEND = recommendationLevelStr2NumDict["强烈推荐"]

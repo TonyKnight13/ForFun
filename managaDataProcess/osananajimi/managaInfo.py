@@ -6,7 +6,7 @@ LastEditTime: 2023-12-31 16:57:23
 FilePath: \ForFun\managaDataProcess\managaInfo.py
 '''
 import json
-from managaManagementConstants import ManagaManagementConstants
+from managaDataProcess.managaManagementConstants import ManagaManagementConstants
 
 
 class ManagaInfo:

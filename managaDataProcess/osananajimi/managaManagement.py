@@ -17,7 +17,7 @@ import re
 import chardet
 from natsort import os_sorted
 
-from managaManagementConstants import ManagaManagementConstants
+from managaDataProcess.managaManagementConstants import ManagaManagementConstants
 from managaInfo import ManagaInfo
 from managaJsonEncoder import ManagaJsonEncoder
 
@@ -36,18 +36,19 @@ class ManagaManagement:
 
     def getFTree(self):
         fTree = os.listdir(self.rootPath)
+        toBeExcludedItems = list()  # 记录被排除的元素
         excludedFolders = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件夹"]]
         excludedFiles = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件"]]
-
+        excludedExtensions = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件类型"]]
         try:
-            if excludedFolders:
-                for folder in excludedFolders:
-                    if folder in fTree:
-                        fTree.remove(folder)
-            if excludedFiles:
-                for file in excludedFiles:
-                    if file in fTree:
-                        fTree.remove(file)
+            toBeExcludedItems.extend(excludedFolders)
+            toBeExcludedItems.extend(excludedFiles)
+            for extension in excludedExtensions:
+                for file in fTree:
+                    if file.endswith(extension):
+                        toBeExcludedItems.append(file)
+            for toBeExcludedItem in toBeExcludedItems:
+                fTree.remove(toBeExcludedItem)
         except:
             logging.exception(self.excludedFileNames + "异常")
         return fTree

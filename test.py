@@ -14,5 +14,12 @@ FilePath: \ForFun\test.py
 #     fo.seek(0)
 #     info = fo.readlines()
 #     print(info)
-x = 'a:'
-print(x.split(':'))
+
+import os
+import re
+import time
+import requests
+from bs4 import BeautifulSoup
+links = ('photos-index-aid-15848554.html','photos-index-aid-55654.html')
+x = [re.search(r'aid-(\d+)', link).group(1) for link in links]
+print(x)
