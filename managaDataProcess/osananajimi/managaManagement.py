@@ -18,6 +18,7 @@ import chardet
 from natsort import os_sorted
 
 from managaDataProcess.managaManagementConstants import ManagaManagementConstants
+from managaDataProcess.osananajimi.logProcessor import LogProcessor
 from managaInfo import ManagaInfo
 from managaJsonEncoder import ManagaJsonEncoder
 
@@ -48,9 +49,10 @@ class ManagaManagement:
                     if file.endswith(extension):
                         toBeExcludedItems.append(file)
             for toBeExcludedItem in toBeExcludedItems:
-                fTree.remove(toBeExcludedItem)
+                while toBeExcludedItem in fTree:
+                    fTree.remove(toBeExcludedItem)
         except:
-            logging.exception(self.excludedFileNames + "异常")
+            log_processor.exception(self.excludedFileNames + "异常")
         return fTree
 
     # 将*.txt转换为*.json，并丰富元信息字段
@@ -92,9 +94,9 @@ class ManagaManagement:
                         ensure_ascii=False,
                     )
         except:
-            logging.exception(managaFolderPath + "异常")
+            log_processor.exception(managaFolderPath + "异常")
         else:
-            logging.info("转换完成！")
+            log_processor.info("转换完成！")
 
     def getInfos(self):
         fTree = self.getFTree()
@@ -138,7 +140,7 @@ class ManagaManagement:
 
                     managaMetaInfos.append(managaInfomation.__dict__)
         except:
-            logging.exception(managaFolderPath + "异常")
+            log_processor.exception(managaFolderPath + "异常")
         else:
             managaInfoDataFrame = pd.DataFrame(
                 managaMetaInfos, columns=[k for k in managaInfomation.__dict__.keys()]
@@ -146,7 +148,7 @@ class ManagaManagement:
             managaInfoDataFrame.to_csv(
                 self.rootPath + self.managaInfosFileName, index=False, sep=","
             )
-            logging.info(self.rootPath + self.managaInfosFileName + "录入完成！")
+            log_processor.info(self.rootPath + self.managaInfosFileName + "录入完成！")
 
     def rename(self):
         fTree = self.getFTree()
@@ -182,11 +184,12 @@ class ManagaManagement:
                         fileList[existIdx] = tempFileName
             
                     os.rename(originFilePath, filePath)
+                    log_processor.info(managaFolderPath + "重命名完成！" + originFilePath + "->" + filePath)
                     fileList[idx] = fileName
         except:
-            logging.exception(managaFolderPath + "异常")
+            log_processor.exception(managaFolderPath + "异常")
         else:
-            logging.info(self.rootPath + "重命名完成！")
+            log_processor.info(self.rootPath + "重命名完成！")
 
 
 if __name__ == "__main__":
@@ -195,7 +198,11 @@ if __name__ == "__main__":
         "--rootPath", type=str, default="D:\\Comic\\SOLA\\幼驯染\\", help="根目录文件路径"
     )
     parser.add_argument("--fatherPath", type=str, default=".\\幼驯染\\", help="父目录文件路径")
-    parser.add_argument("--excludedFileNames", type=str, default="{\"folders\":[\"感觉太像了\"],\"files\":[\"sync.ffs_db\", \"Informations.csv\"]}", help="排除的文件、文件夹名")
+    parser.add_argument("--excludedFileNames", type=str, default="{\"folders\":[\"感觉太像了\"],\"files\":[\"sync.ffs_db\", \"Informations.csv\"],\"extension\":[\".zip\"]}", help="排除的文件、文件夹名")
+    parser.add_argument("--logPath", type=str,
+                        default=os.path.dirname(__file__) + "/logs/",
+                        help="日志路径")
+
     parser.add_argument(
         "--managaInfosFileName",
         type=str,
@@ -210,6 +217,12 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    log_processor = LogProcessor(
+        log_name=args.logPath + "info.log",
+        encoding="utf-8",
+        log_level=logging.INFO
+    )
 
     managaManagement = ManagaManagement()
     managaManagement.rootPath = args.rootPath

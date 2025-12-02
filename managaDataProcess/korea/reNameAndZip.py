@@ -51,7 +51,7 @@ class ManagaManagement:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--rootPath", type=str, default="D:\\Comic\\SOLA\\han\\深度交流会\\", help="根目录文件路径"
+        "--rootPath", type=str, default="D:\\Comic\\SOLA\\han\\一個變態的日常生活\\", help="根目录文件路径"
     )
     parser.add_argument("--excludedFileNames", type=str,
                         default="{\"folders\":[],\"files\":[\"cover.jpg\"],\"extension\":[\".zip\"]}",

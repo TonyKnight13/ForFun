@@ -9,8 +9,8 @@ from urllib.parse import unquote
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # 配置参数
-# 深度交流會 同居上下舖 小孩子才做選擇
-COMIC_NAME = "小孩子才做選擇"
+# 深度交流會 同居上下舖 小孩子才做選擇 大學生活就從社團開始
+COMIC_NAME = "大學生活就從社團開始"
 CSV_FILE = "download_status.csv"
 DOWNLOAD_DIR = "downloads"
 # BASE_URL = "https://www.wn03.cc"
@@ -18,7 +18,6 @@ BASE_URL = "https://www.wnacg01.cc"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
-
 
 def init_csv():
     if not os.path.exists(CSV_FILE):
@@ -39,19 +38,29 @@ def get_downloaded_ids():
 
 
 def save_status(eid, filename, status):
-    # 先检查是否已存在记录
-    exists = False
+    rows = []
+    # 读取现有数据
     if os.path.exists(CSV_FILE):
         with open(CSV_FILE, "r", newline="", encoding="utf-8") as f:
             reader = csv.reader(f)
-            for row in reader:
-                if row[0] == str(eid):
-                    exists = True
-                    break
-    if not exists:
-        with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow([eid, filename, status])
+            rows = list(reader)
+
+    # 查找并更新记录
+    found = False
+    for row in rows:
+        if row[0] == str(eid):
+            row[1] = filename  # 更新文件名
+            row[2] = status    # 更新状态
+            found = True
+            break
+    # 未找到则新增记录
+    if not found:
+        rows.append([eid, filename, status])
+
+    # 写入全部数据
+    with open(CSV_FILE, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(rows)
 
 def parse_search_page(page_html):
     soup = BeautifulSoup(page_html, "html.parser")
