@@ -1,5 +1,5 @@
 from json import JSONEncoder
 
-class ManagaJsonEncoder(JSONEncoder):
+class mangaJsonEncoder(JSONEncoder):
     def default(self, obj):
         return obj.__dict__

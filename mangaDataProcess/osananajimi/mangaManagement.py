@@ -3,7 +3,7 @@ Author: Taony
 Date: 2023-04-05 15:07:02
 LastEditors: Taony
 LastEditTime: 2023-12-30 18:02:20
-FilePath: \ForFun\managaDataProcess\childGetInfo.py
+FilePath: \ForFun\mangaDataProcess\childGetInfo.py
 """
 import os
 import io
@@ -17,30 +17,30 @@ import re
 import chardet
 from natsort import os_sorted
 
-from managaDataProcess.managaManagementConstants import ManagaManagementConstants
-from managaDataProcess.osananajimi.logProcessor import LogProcessor
-from managaInfo import ManagaInfo
-from managaJsonEncoder import ManagaJsonEncoder
+from mangaDataProcess.osananajimi.mangaManagementConstants import mangaManagementConstants
+from mangaDataProcess.osananajimi.logProcessor import LogProcessor
+from mangaInfo import mangaInfo
+from mangaJsonEncoder import mangaJsonEncoder
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-class ManagaManagement:
-    managaManagementConstants = ManagaManagementConstants()
+class mangaManagement:
+    mangaManagementConstants = mangaManagementConstants()
 
     def __init__(self) -> None:
-        self.rootPath = ""
-        self.fatherPath = ""
-        self.excludedFileNames = ""
-        self.managaInfosFileName = ""
-        self.metaFileName = ""
-        self.originMetaFileName = ""
+        self.rootPath = None
+        self.fatherPath = None
+        self.excludedFileNames = None
+        self.mangaInfosFileName = None
+        self.metaFileName = None
+        self.originMetaFileName = None
 
     def getFTree(self):
         fTree = os.listdir(self.rootPath)
         toBeExcludedItems = list()  # 记录被排除的元素
-        excludedFolders = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件夹"]]
-        excludedFiles = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件"]]
-        excludedExtensions = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件类型"]]
+        excludedFolders = json.loads(self.excludedFileNames)[mangaManagementConstants.excludeTypeDict["文件夹"]]
+        excludedFiles = json.loads(self.excludedFileNames)[mangaManagementConstants.excludeTypeDict["文件"]]
+        excludedExtensions = json.loads(self.excludedFileNames)[mangaManagementConstants.excludeTypeDict["文件类型"]]
         try:
             toBeExcludedItems.extend(excludedFolders)
             toBeExcludedItems.extend(excludedFiles)
@@ -59,18 +59,18 @@ class ManagaManagement:
     def convertMetaTxt2Json(self):
         fTree = self.getFTree()
 
-        managaNum = len(fTree)
+        mangaNum = len(fTree)
         try:
-            for i in range(managaNum):
-                managa = list()
-                managaFolderPath = self.rootPath + fTree[i] + "\\"
-                managa.append(fTree[i])
+            for i in range(mangaNum):
+                manga = list()
+                mangaFolderPath = self.rootPath + fTree[i] + "\\"
+                manga.append(fTree[i])
                 with open(
-                    managaFolderPath + self.originMetaFileName, "rb"
+                    mangaFolderPath + self.originMetaFileName, "rb"
                 ) as fTxt, open(
-                    managaFolderPath + self.metaFileName, "w", encoding="utf-8"
+                    mangaFolderPath + self.metaFileName, "w", encoding="utf-8"
                 ) as fJson:
-                    managaInfomation = ManagaInfo()
+                    mangaInfomation = mangaInfo()
                     fTxt.seek(0)
                     metaInfo = fTxt.readlines()
                     assert len(metaInfo) == 4
@@ -80,85 +80,85 @@ class ManagaManagement:
                             subMetaInfo = subMetaInfo.decode("utf-8-sig")
                         metaAttrs = subMetaInfo.strip("\n").split(":")
                         setattr(
-                            managaInfomation,
-                            self.managaManagementConstants.metaCHN2ENGDict[
+                            mangaInfomation,
+                            self.mangaManagementConstants.metaCHN2ENGDict[
                                 metaAttrs[0].strip()
                             ],
                             str(metaAttrs[-1].strip()),
                         )
-                        managaInfomation.Id = str(i)
+                        mangaInfomation.Id = str(i)
                     json.dump(
-                        {k: v for k, v in managaInfomation},
+                        {k: v for k, v in mangaInfomation},
                         fp=fJson,
-                        cls=ManagaJsonEncoder,
+                        cls=mangaJsonEncoder,
                         ensure_ascii=False,
                     )
         except:
-            log_processor.exception(managaFolderPath + "异常")
+            log_processor.exception(mangaFolderPath + "异常")
         else:
             log_processor.info("转换完成！")
 
     def getInfos(self):
         fTree = self.getFTree()
 
-        managaNum = len(fTree)
-        managaMetaInfos = list()
+        mangaNum = len(fTree)
+        mangaMetaInfos = list()
         try:
-            for i in range(managaNum):
-                managaFolderPath = self.rootPath + fTree[i] + "\\"
+            for i in range(mangaNum):
+                mangaFolderPath = self.rootPath + fTree[i] + "\\"
                 with open(
-                    managaFolderPath + self.metaFileName, "r+", encoding="utf-8"
+                    mangaFolderPath + self.metaFileName, "r+", encoding="utf-8"
                 ) as f:
                     metaInfoJsonDict = json.load(fp=f)
                     metaInfoDict = {
-                        self.managaManagementConstants.metaCHN2ENGDict[k]: v
+                        self.mangaManagementConstants.metaCHN2ENGDict[k]: v
                         for k, v in metaInfoJsonDict.items()
                     }
-                    managaInfomation = ManagaInfo(**metaInfoDict)
+                    mangaInfomation = mangaInfo(**metaInfoDict)
 
                     # 数据库记录与对象做映射：...
-                    if managaInfomation.Id == "":
+                    if mangaInfomation.Id == "":
                         # 新增：如果数据库检索不到作者+作品名，则数据库新增记录；否则抛出异常。
                         pass
                     else:
                         # 修改：如果数据库数据与内存数据不一致，记入日志。
                         pass
 
-                    managaInfomation.Path = self.fatherPath + fTree[i] + "\\"
+                    mangaInfomation.Path = self.fatherPath + fTree[i] + "\\"
                     if "-r" in fTree[i]:
-                        managaInfomation.RecommendationLevel = (
-                            self.managaManagementConstants.RECOMMEND
+                        mangaInfomation.RecommendationLevel = (
+                            self.mangaManagementConstants.RECOMMEND
                         )
                     if "-spr" in fTree[i]:
-                        managaInfomation.RecommendationLevel = (
-                            self.managaManagementConstants.HIGHLY_RECOMMEND
+                        mangaInfomation.RecommendationLevel = (
+                            self.mangaManagementConstants.HIGHLY_RECOMMEND
                         )
                     if "(re)" in fTree[i]:
-                        managaInfomation.remake = (
-                            self.managaManagementConstants.REMAKE_PLAN
+                        mangaInfomation.remake = (
+                            self.mangaManagementConstants.REMAKE_PLAN
                         )
 
-                    managaMetaInfos.append(managaInfomation.__dict__)
+                    mangaMetaInfos.append(mangaInfomation.__dict__)
         except:
-            log_processor.exception(managaFolderPath + "异常")
+            log_processor.exception(mangaFolderPath + "异常")
         else:
-            managaInfoDataFrame = pd.DataFrame(
-                managaMetaInfos, columns=[k for k in managaInfomation.__dict__.keys()]
+            mangaInfoDataFrame = pd.DataFrame(
+                mangaMetaInfos, columns=[k for k in mangaInfomation.__dict__.keys()]
             )
-            managaInfoDataFrame.to_csv(
-                self.rootPath + self.managaInfosFileName, index=False, sep=","
+            mangaInfoDataFrame.to_csv(
+                self.rootPath + self.mangaInfosFileName, index=False, sep=","
             )
-            log_processor.info(self.rootPath + self.managaInfosFileName + "录入完成！")
+            log_processor.info(self.rootPath + self.mangaInfosFileName + "录入完成！")
 
-    def rename(self):
+    def batchRename(self):
         fTree = self.getFTree()
 
-        managaNum = len(fTree)
+        mangaNum = len(fTree)
 
         try:
-            for i in range(managaNum):
-                managaFolderPath = self.rootPath + fTree[i] + "\\"
-                fileList = os.listdir(managaFolderPath)
+            for i in range(mangaNum):
+                mangaFolderPath = self.rootPath + fTree[i] + "\\"
+                fileList = os.listdir(mangaFolderPath)
                 fileList.remove(self.metaFileName)
                 for pic in fileList.copy():
                     matchObj = re.match("E", pic)
@@ -169,27 +169,55 @@ class ManagaManagement:
                 fileList = os_sorted(fileList)
 
                 for idx in range(len(fileList)):
-                    originFilePath = managaFolderPath + fileList[idx]
+                    originFilePath = mangaFolderPath + fileList[idx]
                     _, fileType = os.path.splitext(originFilePath)
                     fileName = str(idx + 1).zfill(3) + fileType
-                    filePath = managaFolderPath + fileName
+                    filePath = mangaFolderPath + fileName
                     # 将已存在的文件名进行修改，改为临时命名
                     if fileName in fileList:
                         existIdx = fileList.index(fileName)
                         if existIdx == idx:
                             continue
                         tempFileName = 'tempForRename' + fileName
-                        tempFilePath = managaFolderPath + tempFileName
+                        tempFilePath = mangaFolderPath + tempFileName
                         os.rename(filePath, tempFilePath)
                         fileList[existIdx] = tempFileName
-            
+
                     os.rename(originFilePath, filePath)
-                    log_processor.info(managaFolderPath + "重命名完成！" + originFilePath + "->" + filePath)
+                    log_processor.info(mangaFolderPath + "重命名完成！" + originFilePath + "->" + filePath)
                     fileList[idx] = fileName
         except:
-            log_processor.exception(managaFolderPath + "异常")
+            log_processor.exception(mangaFolderPath + "异常")
         else:
             log_processor.info(self.rootPath + "重命名完成！")
+
+    def rename(self, process_path):
+        fileList = os.listdir(process_path)
+        if self.metaFileName in fileList:
+            fileList.remove(self.metaFileName)
+        for pic in fileList.copy():
+            matchObj = re.match("E", pic)
+            if matchObj:
+                fileList.remove(pic)
+        # 按操作系统的排序算法进行排序
+        fileList = os_sorted(fileList)
+        for idx in range(len(fileList)):
+            originFilePath = process_path + fileList[idx]
+            _, fileType = os.path.splitext(originFilePath)
+            processedFileName = str(idx + 1).zfill(3) + fileType
+            processedFilePath = process_path + processedFileName
+            # 将已存在的文件名进行修改，改为临时命名
+            if processedFileName in fileList:
+                existIdx = fileList.index(processedFileName)
+                if existIdx == idx:
+                    continue
+                tempFileName = 'tempForRename' + processedFileName
+                tempFilePath = process_path + tempFileName
+                os.rename(processedFilePath, tempFilePath)
+                fileList[existIdx] = tempFileName
+            os.rename(originFilePath, processedFilePath)
+            log_processor.info(process_path + "重命名完成！" + originFilePath + "->" + processedFilePath)
+            fileList[idx] = processedFileName
 
 
 if __name__ == "__main__":
@@ -204,7 +232,7 @@ if __name__ == "__main__":
                         help="日志路径")
 
     parser.add_argument(
-        "--managaInfosFileName",
+        "--mangaInfosFileName",
         type=str,
         default="Informations.csv",
         help="漫画信息CSV表名",
@@ -224,14 +252,14 @@ if __name__ == "__main__":
         log_level=logging.INFO
     )
 
-    managaManagement = ManagaManagement()
-    managaManagement.rootPath = args.rootPath
-    managaManagement.fatherPath = args.fatherPath
-    managaManagement.excludedFileNames = args.excludedFileNames
-    managaManagement.managaInfosFileName = args.managaInfosFileName
-    managaManagement.metaFileName = args.metaFileName
-    managaManagement.originMetaFileName = args.originMetaFileName
+    mangaManagement = mangaManagement()
+    mangaManagement.rootPath = args.rootPath
+    mangaManagement.fatherPath = args.fatherPath
+    mangaManagement.excludedFileNames = args.excludedFileNames
+    mangaManagement.mangaInfosFileName = args.mangaInfosFileName
+    mangaManagement.metaFileName = args.metaFileName
+    mangaManagement.originMetaFileName = args.originMetaFileName
 
-    # managaManagement.convertMetaTxt2Json()
-    managaManagement.getInfos()
-    managaManagement.rename()
+    # mangaManagement.convertMetaTxt2Json()
+    mangaManagement.getInfos()
+    mangaManagement.rename()

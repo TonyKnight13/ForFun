@@ -24,3 +24,6 @@ links = ('photos-index-aid-15848554.html','photos-index-aid-55654.html')
 x = [re.search(r'aid-(\d+)', link).group(1) for link in links]
 comic_no = [str(i) for i in range(25, 37)]
 print(comic_no )
+
+
+print(os.listdir('D:\\Comic\\SOLA\\幼驯染\\013-spr\\'))
