@@ -1,15 +1,14 @@
 import argparse
-import copy
 import itertools
 import json
 import os
 import logging
 import zipfile
 
-from managaDataProcess.managaManagementConstants import ManagaManagementConstants
+from mangaDataProcess.osananajimi.mangaManagementConstants import mangaManagementConstants
 
 
-class ManagaManagement:
+class mangaManagement:
     def __init__(self) -> None:
         self.rootPath = ""
         self.excludedFileNames = ""
@@ -17,9 +16,9 @@ class ManagaManagement:
     def getFtree(self):
         fTree = os.listdir(self.rootPath)
         toBeExcludedItems = list()  # 记录被排除的元素
-        excludedFolders = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件夹"]]
-        excludedFiles = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件"]]
-        excludedExtensions = json.loads(self.excludedFileNames)[ManagaManagementConstants.excludeTypeDict["文件类型"]]
+        excludedFolders = json.loads(self.excludedFileNames)[mangaManagementConstants.excludeTypeDict["文件夹"]]
+        excludedFiles = json.loads(self.excludedFileNames)[mangaManagementConstants.excludeTypeDict["文件"]]
+        excludedExtensions = json.loads(self.excludedFileNames)[mangaManagementConstants.excludeTypeDict["文件类型"]]
         try:
             toBeExcludedItems.extend(excludedFolders)
             toBeExcludedItems.extend(excludedFiles)
@@ -28,7 +27,8 @@ class ManagaManagement:
                     if file.endswith(extension):
                         toBeExcludedItems.append(file)
             for toBeExcludedItem in toBeExcludedItems:
-                fTree.remove(toBeExcludedItem)
+                while toBeExcludedItem in fTree:
+                    fTree.remove(toBeExcludedItem)
         except:
             logging.exception(self.excludedFileNames + "异常")
         return fTree
@@ -51,14 +51,14 @@ class ManagaManagement:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--rootPath", type=str, default="D:\\Comic\\SOLA\\han\\一個變態的日常生活\\", help="根目录文件路径"
+        "--rootPath", type=str, default="D:\\Comic\\SOLA\\han\\纯情女攻略计划\\", help="根目录文件路径"
     )
     parser.add_argument("--excludedFileNames", type=str,
                         default="{\"folders\":[],\"files\":[\"cover.jpg\"],\"extension\":[\".zip\"]}",
                         help="排除的文件、文件夹名")
 
     args = parser.parse_args()
-    managaManagement = ManagaManagement()
-    managaManagement.rootPath = args.rootPath
-    managaManagement.excludedFileNames = args.excludedFileNames
-    managaManagement.zip()
+    mangaManagement = mangaManagement()
+    mangaManagement.rootPath = args.rootPath
+    mangaManagement.excludedFileNames = args.excludedFileNames
+    mangaManagement.zip()
