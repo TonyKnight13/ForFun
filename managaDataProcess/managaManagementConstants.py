@@ -3,18 +3,18 @@ Author: Taony
 Date: 2023-12-31 18:11:38
 LastEditors: Taony
 LastEditTime: 2024-02-07 23:02:30
-FilePath: \ForFun\mangaDataProcess\mangaManagementConstants.py
+FilePath: \ForFun\managaDataProcess\managaManagementConstants.py
 '''
 """
 Author: Taony
 Date: 2023-12-31 16:42:40
 LastEditors: Taony
 LastEditTime: 2023-12-31 16:55:04
-FilePath: \ForFun\mangaDataProcess\mangaManagementConstants.py
+FilePath: \ForFun\managaDataProcess\ManagaManagementConstants.py
 """
 
 
-class mangaManagementConstants:
+class ManagaManagementConstants:
     metaENG2CHNDict = {
         "Id": "序列号",
         "Name": "名称",

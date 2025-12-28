@@ -1,4 +1,0 @@
-
-class utilsConstants:
-    WIN_FILE_ATTRIBUTE_HIDDEN = 0x2
-    WIN_FILE_ATTRIBUTE_SYSTEM = 0x4

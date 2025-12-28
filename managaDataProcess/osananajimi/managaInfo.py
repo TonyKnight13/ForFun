@@ -3,14 +3,14 @@ Author: Taony
 Date: 2023-12-30 16:45:46
 LastEditors: Taony
 LastEditTime: 2023-12-31 16:57:23
-FilePath: \ForFun\mangaDataProcess\mangaInfo.py
+FilePath: \ForFun\managaDataProcess\managaInfo.py
 '''
 import json
-from mangaDataProcess.osananajimi.mangaManagementConstants import mangaManagementConstants
+from managaDataProcess.managaManagementConstants import ManagaManagementConstants
 
 
-class mangaInfo:
-    mangaManagementConstants = mangaManagementConstants()
+class ManagaInfo:
+    managaManagementConstants = ManagaManagementConstants()
     def __init__(self) -> None:
         self.Id = ''
         self.Name = ''
@@ -34,7 +34,7 @@ class mangaInfo:
 
     def __iter__(self):
         yield from {
-            k:getattr(self, v) for k,v in self.mangaManagementConstants.metaCHN2ENGDict.items()
+            k:getattr(self, v) for k,v in self.managaManagementConstants.metaCHN2ENGDict.items()
         }.items()
 
     def __str__(self):
