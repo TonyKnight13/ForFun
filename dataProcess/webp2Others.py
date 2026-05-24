@@ -324,7 +324,7 @@ def main():
     # 3. 转换整个目录
     print("开始转换WebP图片...")
     results = batch_converter.convert_directory(
-        source_dir="./origin//webp_images",  # 替换为您的WebP图片目录
+        source_dir="./origin/webp_images",  # 替换为您的WebP图片目录
         target_dir="./processed/converted_images",
         recursive=True  # 递归处理子目录
     )
