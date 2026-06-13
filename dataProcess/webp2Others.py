@@ -10,6 +10,7 @@ from enum import Enum
 class ImageFormat(Enum):
     """支持的图片格式枚举"""
     PNG = "png"
+    JPG = "jpg"
     JPEG = "jpeg"
     TIFF = "tiff"
     BMP = "bmp"
@@ -86,8 +87,14 @@ class WebPConverter(ImageConverter):
         try:
             # 打开WebP图片
             with Image.open(source_path) as img:
-                # 转换为RGB模式如果输出格式不支持透明度且原图有透明度
-                if not self.preserve_transparency and img.mode in ('RGBA', 'LA'):
+                # JPEG 不支持透明度，必须转换为 RGB
+                jpg_formats = {ImageFormat.JPG, ImageFormat.JPEG}
+                if self.output_format in jpg_formats:
+                    if img.mode in ('RGBA', 'LA', 'PA', 'P'):
+                        img = img.convert('RGB')
+                    elif img.mode != 'RGB':
+                        img = img.convert('RGB')
+                elif not self.preserve_transparency and img.mode in ('RGBA', 'LA'):
                     background = Image.new('RGB', img.size, (255, 255, 255))
                     if img.mode == 'RGBA':
                         background.paste(img, mask=img.split()[-1])
@@ -100,8 +107,9 @@ class WebPConverter(ImageConverter):
                 # 根据格式选择保存参数
                 save_params = self._get_save_params()
                 
-                # 保存图片
-                img.save(target_path, format=self.output_format.value.upper(), **save_params)
+                # 保存图片（JPG 需映射为 JPEG，Pillow 只认 JPEG）
+                pillow_format = 'JPEG' if self.output_format == ImageFormat.JPG else self.output_format.value.upper()
+                img.save(target_path, format=pillow_format, **save_params)
                 
                 # 计算转换时间
                 conversion_time = time.time() - start_time
@@ -128,7 +136,7 @@ class WebPConverter(ImageConverter):
         """获取保存参数"""
         params = {}
         
-        if self.output_format in [ImageFormat.JPEG, ImageFormat.PNG]:
+        if self.output_format in [ImageFormat.JPEG, ImageFormat.JPG, ImageFormat.PNG]:
             params['quality'] = self.quality
             
         if self.output_format == ImageFormat.PNG:
@@ -313,7 +321,7 @@ def main():
     """主函数示例"""
     # 1. 创建PNG转换器（推荐格式）
     png_converter = WebPConverter(
-        output_format=ImageFormat.PNG,
+        output_format=ImageFormat.JPG,
         quality=100,  # 最高质量
         preserve_transparency=True
     )
